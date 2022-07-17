@@ -49,8 +49,46 @@ struct Level {
 
 impl Level {
     fn new(w: usize, h: usize) -> Self {
-        let m = vec![Tile::Floor; w*h];
+        let m = vec![Tile::Empty; w*h];
         Level { map: m, width: w, height: h}
+    }
+    
+    fn add_room_to_map(&mut self, room: Room) {
+        for y in room.y..room.y+room.h {
+            for x in room.x..room.x+room.w {
+                if x == room.x || y == room.y {
+                    self.map[x+self.width*y] = Tile::Wall;
+                } else if x == room.x+room.w-1 || y == room.y+room.h-1 {
+                    self.map[x+self.width*y] = Tile::Wall;
+                } else {
+                    self.map[x+self.width*y] = Tile::Floor;
+                }
+            }
+        }
+    }
+}
+
+struct Room {
+    x: usize,
+    y: usize,
+    w: usize,
+    h: usize,
+}
+
+// #####
+// #...#
+// #...#
+// #...#
+// #####
+
+impl Room {
+    fn new() -> Self {
+        Room {
+            x: 45,
+            y: 8,
+            w: 15,
+            h: 10,
+        }
     }
 }
 
@@ -62,8 +100,13 @@ fn main() -> Result<()> {
     enable_raw_mode()?;
     stdout.queue(cursor::Hide)?;
     
-    // let mut level = Level::new();
-    let mut level = Level::new(20, 70);
+    let mut level = Level::new(70, 20);
+    let room = Room::new();    
+    level.add_room_to_map(room);
+    // x + width * y
+    // let x = 1;
+    // let y = 4;
+    // level.map[x + level.width * y] = Tile::Wall;
 
     while !quit {
         // Clear Terminal and reset cursor to beginning
@@ -71,15 +114,15 @@ fn main() -> Result<()> {
         stdout.queue(MoveTo(0,0))?;
         
         // Draw Level
-        for y in 0..level.height+1 {
-            for x in 0..level.width+1 {
-                stdout.queue(MoveTo(y as u16, x as u16))?;
-                stdout.queue(PrintStyledContent(level.map[x + level.width + y].draw()))?;
+        for y in 0..level.height {
+            for x in 0..level.width {
+                stdout.queue(MoveTo(x as u16, y as u16))?;
+                stdout.queue(PrintStyledContent(level.map[x+level.width*y].draw()))?;
             }
         }
         
         // Draw Player
-        stdout.queue(MoveTo(10,10))?;
+        stdout.queue(MoveTo(50,10))?;
         let content = format!("@").with(Color::Green);
         stdout.queue(PrintStyledContent(content))?;
         
