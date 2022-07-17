@@ -1,7 +1,7 @@
 use crossterm::{
     cursor::{self, MoveTo},
     event::{Event, KeyCode, read},
-    style::{Color, PrintStyledContent, Stylize},
+    style::{Color, PrintStyledContent, StyledContent, Stylize},
     terminal::{Clear, ClearType, enable_raw_mode, disable_raw_mode},
     Result,
     QueueableCommand,
@@ -20,6 +20,22 @@ impl Drop for CleanUp {
     }
 }
 
+enum Tile {
+    Empty,
+    Floor,
+    Wall,
+}
+
+impl Tile {
+    fn draw(&self) -> StyledContent<String> {
+        match self {
+            Tile::Empty => format!(" ").with(Color::Blue),
+            Tile::Floor => format!(".").with(Color::Blue),
+            Tile::Wall => format!("#").with(Color::Blue),
+        }
+    }
+}
+
 fn main() -> Result<()> {
     let mut quit = false;
     let mut stdout = stdout();
@@ -33,9 +49,8 @@ fn main() -> Result<()> {
         stdout.queue(Clear(ClearType::All))?;
         stdout.queue(MoveTo(0,0))?;
         
-        // Print a green @ symbol to represent our player
-        let content = format!("@").with(Color::Green);
-        stdout.queue(PrintStyledContent(content))?;
+        let tile = Tile::Wall;
+        stdout.queue(PrintStyledContent(tile.draw()))?;
         
         // Flush stdout
         stdout.flush()?;
