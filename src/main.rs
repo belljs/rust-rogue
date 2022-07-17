@@ -81,6 +81,39 @@ impl Room {
     }
 }
 
+enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+}
+
+struct Character {
+    x: usize,
+    y: usize,
+    symbol: char,
+    color: Color,
+}
+
+impl Character {
+    fn new(x: usize, y:usize, symbol:char, color:Color) -> Self {
+        Character{x, y, symbol, color}
+    }
+    
+    fn draw(&self) -> StyledContent<String> {
+        format!("{}", self.symbol).with(self.color)
+    }
+    
+    fn go(&mut self, dir: Direction) {
+        match dir {
+            Direction::Up => self.y -= 1,
+            Direction::Down => self.y += 1,
+            Direction::Left => self.x -= 1,
+            Direction::Right => self.x += 1,
+        };
+    }
+}
+
 fn main() -> Result<()> {
     let mut quit = false;
     let mut stdout = stdout();
@@ -88,7 +121,8 @@ fn main() -> Result<()> {
     
     enable_raw_mode()?;
     stdout.queue(cursor::Hide)?;
-    
+
+    // Manually create a level and rooms until an algorithm is implemented.
     let mut level = Level::new(70, 20);
     let room = Room::new(5, 2, 15, 10);    
     let room2 = Room::new(25, 8, 30, 10);
@@ -96,6 +130,8 @@ fn main() -> Result<()> {
     level.add_room_to_map(room);
     level.add_room_to_map(room2);
     level.add_room_to_map(room3);
+    
+    let mut player = Character::new(16, 6, '@', Color::Green);
 
     while !quit {
         // Clear Terminal and reset cursor to the top left
@@ -111,9 +147,8 @@ fn main() -> Result<()> {
         }
         
         // Draw Player
-        stdout.queue(MoveTo(12,6))?;
-        let content = format!("@").with(Color::Green);
-        stdout.queue(PrintStyledContent(content))?;
+        stdout.queue(MoveTo(player.x as u16, player.y as u16))?;
+        stdout.queue(PrintStyledContent(player.draw()))?;
         
         // Flush stdout
         stdout.flush()?;
@@ -122,6 +157,14 @@ fn main() -> Result<()> {
         let event = read()?;
         if event == Event::Key(KeyCode::Esc.into()) {
             quit = true;
+        } else if event == Event::Key(KeyCode::Up.into()) {
+            player.go(Direction::Up);
+        } else if event == Event::Key(KeyCode::Down.into()) {
+            player.go(Direction::Down);
+        } else if event == Event::Key(KeyCode::Left.into()) {
+            player.go(Direction::Left);
+        } else if event == Event::Key(KeyCode::Right.into()) {
+            player.go(Direction::Right);
         }
     }
     disable_raw_mode()
