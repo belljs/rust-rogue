@@ -1,5 +1,5 @@
 use crossterm::{
-    cursor::{self, MoveTo},
+    cursor::{self, MoveDown, MoveTo},
     event::{Event, KeyCode, read},
     style::{Color, PrintStyledContent, StyledContent, Stylize},
     terminal::{Clear, ClearType, enable_raw_mode, disable_raw_mode},
@@ -20,10 +20,15 @@ impl Drop for CleanUp {
     }
 }
 
+#[derive(Copy, Clone)]
 enum Tile {
     Empty,
     Floor,
     Wall,
+}
+
+impl Default for Tile {
+    fn default() -> Self { Tile::Wall }
 }
 
 impl Tile {
@@ -36,6 +41,19 @@ impl Tile {
     }
 }
 
+struct Level {
+    map: Vec<Tile>,
+    width: usize,
+    height: usize,
+}
+
+impl Level {
+    fn new(w: usize, h: usize) -> Self {
+        let m = vec![Tile::Wall; w*h];
+        Level { map: m, width: w, height: h}
+    }
+}
+
 fn main() -> Result<()> {
     let mut quit = false;
     let mut stdout = stdout();
@@ -44,13 +62,21 @@ fn main() -> Result<()> {
     enable_raw_mode()?;
     stdout.queue(cursor::Hide)?;
     
+    // let mut level = Level::new();
+    let mut level = Level::new(70, 20);
+
     while !quit {
         // Clear Terminal and reset cursor to beginning
         stdout.queue(Clear(ClearType::All))?;
         stdout.queue(MoveTo(0,0))?;
         
-        let tile = Tile::Wall;
-        stdout.queue(PrintStyledContent(tile.draw()))?;
+        // Draw Level
+        for x in 0..level.width+1 {
+            for y in 0..level.height+1 {
+                stdout.queue(MoveTo(x as u16,y as u16))?;
+                stdout.queue(PrintStyledContent(level.map[x + level.width + y].draw()))?;
+            }
+        }
         
         // Flush stdout
         stdout.flush()?;
