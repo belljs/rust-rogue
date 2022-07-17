@@ -1,5 +1,5 @@
 use crossterm::{
-    cursor::{self, MoveDown, MoveTo},
+    cursor::{self, MoveTo},
     event::{Event, KeyCode, read},
     style::{Color, PrintStyledContent, StyledContent, Stylize},
     terminal::{Clear, ClearType, enable_raw_mode, disable_raw_mode},
@@ -75,20 +75,9 @@ struct Room {
     h: usize,
 }
 
-// #####
-// #...#
-// #...#
-// #...#
-// #####
-
 impl Room {
-    fn new() -> Self {
-        Room {
-            x: 45,
-            y: 8,
-            w: 15,
-            h: 10,
-        }
+    fn new(x: usize, y: usize, w: usize, h: usize) -> Self {
+        Room {x,y,w,h}
     }
 }
 
@@ -101,15 +90,15 @@ fn main() -> Result<()> {
     stdout.queue(cursor::Hide)?;
     
     let mut level = Level::new(70, 20);
-    let room = Room::new();    
+    let room = Room::new(5, 2, 15, 10);    
+    let room2 = Room::new(25, 8, 30, 10);
+    let room3 = Room::new(60, 12, 10, 8);
     level.add_room_to_map(room);
-    // x + width * y
-    // let x = 1;
-    // let y = 4;
-    // level.map[x + level.width * y] = Tile::Wall;
+    level.add_room_to_map(room2);
+    level.add_room_to_map(room3);
 
     while !quit {
-        // Clear Terminal and reset cursor to beginning
+        // Clear Terminal and reset cursor to the top left
         stdout.queue(Clear(ClearType::All))?;
         stdout.queue(MoveTo(0,0))?;
         
@@ -122,7 +111,7 @@ fn main() -> Result<()> {
         }
         
         // Draw Player
-        stdout.queue(MoveTo(50,10))?;
+        stdout.queue(MoveTo(12,6))?;
         let content = format!("@").with(Color::Green);
         stdout.queue(PrintStyledContent(content))?;
         
