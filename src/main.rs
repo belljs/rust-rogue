@@ -49,7 +49,7 @@ struct Level {
 
 impl Level {
     fn new(w: usize, h: usize) -> Self {
-        let m = vec![Tile::Wall; w*h];
+        let m = vec![Tile::Floor; w*h];
         Level { map: m, width: w, height: h}
     }
 }
@@ -63,7 +63,7 @@ fn main() -> Result<()> {
     stdout.queue(cursor::Hide)?;
     
     // let mut level = Level::new();
-    let mut level = Level::new(70, 20);
+    let mut level = Level::new(20, 70);
 
     while !quit {
         // Clear Terminal and reset cursor to beginning
@@ -71,12 +71,17 @@ fn main() -> Result<()> {
         stdout.queue(MoveTo(0,0))?;
         
         // Draw Level
-        for y in 0..level.width+1 {
-            for x in 0..level.height+1 {
-                stdout.queue(MoveTo(x as u16,y as u16))?;
+        for y in 0..level.height+1 {
+            for x in 0..level.width+1 {
+                stdout.queue(MoveTo(y as u16, x as u16))?;
                 stdout.queue(PrintStyledContent(level.map[x + level.width + y].draw()))?;
             }
         }
+        
+        // Draw Player
+        stdout.queue(MoveTo(10,10))?;
+        let content = format!("@").with(Color::Green);
+        stdout.queue(PrintStyledContent(content))?;
         
         // Flush stdout
         stdout.flush()?;
