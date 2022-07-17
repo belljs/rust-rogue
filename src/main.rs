@@ -71,8 +71,8 @@ fn main() -> Result<()> {
         stdout.queue(MoveTo(0,0))?;
         
         // Draw Level
-        for x in 0..level.width+1 {
-            for y in 0..level.height+1 {
+        for y in 0..level.width+1 {
+            for x in 0..level.height+1 {
                 stdout.queue(MoveTo(x as u16,y as u16))?;
                 stdout.queue(PrintStyledContent(level.map[x + level.width + y].draw()))?;
             }
