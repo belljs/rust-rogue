@@ -133,11 +133,11 @@ fn main() -> Result<()> {
     
     let mut player = Character::new(16, 6, '@', Color::Green);
 
-    while !quit {
-        // Clear Terminal and reset cursor to the top left
-        stdout.queue(Clear(ClearType::All))?;
-        stdout.queue(MoveTo(0,0))?;
-        
+    // Clear Terminal and reset cursor to the top left
+    stdout.queue(Clear(ClearType::All))?;
+    stdout.queue(MoveTo(0,0))?;
+
+    while !quit {       
         // Draw Level
         for y in 0..level.height {
             for x in 0..level.width {
