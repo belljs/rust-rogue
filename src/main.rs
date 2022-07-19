@@ -104,12 +104,21 @@ impl Character {
         format!("{}", self.symbol).with(self.color)
     }
     
-    fn go(&mut self, dir: Direction) {
+    fn go(&mut self, level: &Level, dir: Direction) {
+        let mut target_x = self.x;
+        let mut target_y = self.y;
         match dir {
-            Direction::Up => self.y -= 1,
-            Direction::Down => self.y += 1,
-            Direction::Left => self.x -= 1,
-            Direction::Right => self.x += 1,
+            Direction::Up => target_y -= 1,
+            Direction::Down => target_y += 1,
+            Direction::Left => target_x -= 1,
+            Direction::Right => target_x += 1,
+        };
+        match level.map[target_x + level.width * target_y] {
+            Tile::Wall => (),
+            _ => {
+                self.x = target_x;
+                self.y = target_y
+            }
         };
     }
 }
@@ -158,13 +167,13 @@ fn main() -> Result<()> {
         if event == Event::Key(KeyCode::Esc.into()) {
             quit = true;
         } else if event == Event::Key(KeyCode::Up.into()) {
-            player.go(Direction::Up);
+            player.go(&level, Direction::Up);
         } else if event == Event::Key(KeyCode::Down.into()) {
-            player.go(Direction::Down);
+            player.go(&level, Direction::Down);
         } else if event == Event::Key(KeyCode::Left.into()) {
-            player.go(Direction::Left);
+            player.go(&level, Direction::Left);
         } else if event == Event::Key(KeyCode::Right.into()) {
-            player.go(Direction::Right);
+            player.go(&level, Direction::Right);
         }
     }
     disable_raw_mode()
